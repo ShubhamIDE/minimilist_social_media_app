@@ -1,17 +1,40 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:minimilist_social_media_app/components/my_botton.dart';
 import 'package:minimilist_social_media_app/components/my_text_field.dart';
+import 'package:minimilist_social_media_app/helper/helper_functions.dart';
 
-class LoginPage extends StatelessWidget {
-  TextEditingController emailController = TextEditingController();
-  TextEditingController passwordController = TextEditingController();
-
+class LoginPage extends StatefulWidget {
   final void Function()? onTap;
 
   LoginPage({super.key, required this.onTap});
 
-  void login() {}
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  TextEditingController emailController = TextEditingController();
+
+  TextEditingController passwordController = TextEditingController();
+
+  void login() async {
+    showDialog(
+        context: context,
+        builder: (context) => const Center(
+              child: CircularProgressIndicator(),
+            ));
+
+    try {
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: emailController.text, password: passwordController.text);
+      if (context.mounted) Navigator.pop(context);
+    } on FirebaseAuthException catch (e) {
+      Navigator.pop(context);
+      displayMessageToUser(e.code, context);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +69,7 @@ class LoginPage extends StatelessWidget {
               const SizedBox(height: 10),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
-                children: [ 
+                children: [
                   Text("Forgot Password?",
                       style: TextStyle(
                           color: Theme.of(context).colorScheme.inversePrimary))
@@ -64,7 +87,7 @@ class LoginPage extends StatelessWidget {
                   Text("Don't have an account?"),
                   GestureDetector(
                     onTap: () {
-                      onTap;
+                      widget.onTap;
                     },
                     child: const Text(
                       " Register Here",
