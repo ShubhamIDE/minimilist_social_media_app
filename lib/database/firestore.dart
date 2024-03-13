@@ -1,0 +1,29 @@
+/*
+
+This database stores posts that user have published in the app. It is stored in collections called 'Posts' in Firebase.
+
+*/
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
+class FireStoreDatabase {
+  User? user = FirebaseAuth.instance.currentUser;
+  final CollectionReference posts =
+      FirebaseFirestore.instance.collection('Posts');
+
+  Future<void> addPost(String message) {
+    return posts.add({
+      'UserEmail': user!.email,
+      'PostMessage': message,
+      'TimeStamp': Timestamp.now(),
+    });
+  }
+
+  Stream<QuerySnapshot> getPostsStream() {
+    final postsStream = FirebaseFirestore.instance
+        .collection('Posts')
+        .orderBy('TimeStamp', descending: true)
+        .snapshots();
+    return postsStream;
+  }
+}
